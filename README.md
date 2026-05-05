@@ -606,7 +606,8 @@ sudo ./forward.sh
 # 3) 设置运行模式 → auto
 # 4) 编辑转发配置文件 → 增加转发：
 #    name=test, gateway_port=9001
-#    中转地址：直接输入 10.0.0.1（IP 形式）或 relay.example.com（域名形式）
+#    中转地址：可直接回车（默认 = 本机出口 IP，由 get_local_ip 自动检测）
+#      - 直接回车 → 写入 relay_ip = 本机 IP（中转节点最常见场景）
 #      - 输入 IP   → 自动写入 relay_ip 字段
 #      - 输入域名 → 自动写入 relay_host 字段（前置节点会动态解析）
 #    relay_port=9001

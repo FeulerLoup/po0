@@ -2552,13 +2552,24 @@ auto_add_forward() {
     # 中转地址：relay_host(域名) 与 relay_ip 二选一
     #   - 输入域名 → 写入 relay_host，relay_ip 留空（gateway 端按 relay_host 解析使用）
     #   - 输入 IP   → 写入 relay_ip，relay_host 留空
-    local relay_input relay_host="" relay_ip=""
+    #   - 直接回车 → 默认使用本机出口 IP（中转节点添加转发的最常见场景：自己即中转）
+    local relay_input relay_host="" relay_ip="" local_ip_default=""
+    local_ip_default=$(get_local_ip 2>/dev/null) || local_ip_default=""
     while true; do
-        read -rp "中转地址 (域名或 IP，relay_host/relay_ip 二选一): " relay_input
+        if [[ -n "$local_ip_default" ]]; then
+            read -rp "中转地址 (域名或 IP，relay_host/relay_ip 二选一) [回车=本机IP ${local_ip_default}]: " relay_input
+            relay_input="${relay_input:-$local_ip_default}"
+        else
+            read -rp "中转地址 (域名或 IP，relay_host/relay_ip 二选一): " relay_input
+        fi
         if [[ -z "$relay_input" ]]; then ERR "不能为空"; continue; fi
         if validate_ip "$relay_input"; then
             relay_ip="$relay_input"
-            INFO "识别为 IP，将写入 relay_ip=${relay_ip}"
+            if [[ "$relay_ip" == "$local_ip_default" ]]; then
+                INFO "已使用本机 IP，将写入 relay_ip=${relay_ip}"
+            else
+                INFO "识别为 IP，将写入 relay_ip=${relay_ip}"
+            fi
             break
         fi
         if validate_host "$relay_input"; then
